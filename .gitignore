@@ -1,0 +1,13 @@
+node_modules
+.next
+.env
+.env.local
+data/*.db
+data/*.db-*
+media/*
+!media/.gitkeep
+!data/.gitkeep
+*.log
+.DS_Store
+next-env.d.ts
+tsconfig.tsbuildinfo
