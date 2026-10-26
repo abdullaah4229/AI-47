@@ -22,7 +22,10 @@ type Props = { params: Promise<{ slug: string }> }
 const SITE_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 
 export async function generateStaticParams() {
-  return (await getAllPublishedSlugs()).map((slug) => ({ slug }))
+  const slugs = await getAllPublishedSlugs()
+  // A static export needs at least one page per route; with no published posts this renders the 404 page
+  if (!slugs.length && process.env.STATIC_EXPORT === '1') return [{ slug: 'no-posts-yet' }]
+  return slugs.map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

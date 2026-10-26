@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 
+export const dynamic = 'force-static'
 const SITE_URL = (process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000').replace(/\/$/, '')
 
 /** /robots.txt — let search engines in, keep them out of the admin panel and API. */

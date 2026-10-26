@@ -13,8 +13,12 @@ const DESCRIPTION = 'Practical opinions and lessons on AI for small business —
 
 type Props = { searchParams: Promise<{ page?: string }> }
 
+// A static export (GitHub Pages) has no query string at build time, so it always renders page 1
+const pageFrom = async (searchParams: Props['searchParams']) =>
+  process.env.STATIC_EXPORT === '1' ? 1 : Math.max(1, Number((await searchParams).page) || 1)
+
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const page = Number((await searchParams).page) || 1
+  const page = await pageFrom(searchParams)
   return {
     title: page > 1 ? `${TITLE} — Page ${page}` : TITLE,
     description: DESCRIPTION,
@@ -24,7 +28,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 }
 
 export default async function BlogPage({ searchParams }: Props) {
-  const page = Math.max(1, Number((await searchParams).page) || 1)
+  const page = await pageFrom(searchParams)
   const [{ posts, totalPages }, categories] = await Promise.all([getPosts({ page }), getCategories()])
   return (
     <div className="svc-page">

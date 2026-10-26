@@ -131,3 +131,15 @@ Changes appear on the website within seconds.
 | `npm run generate:types` | Refresh TypeScript types after editing collections |
 
 Deploying to your VPS: see **DEPLOY.md**.
+
+## GitHub Pages (static preview)
+
+Every push to `main` publishes a static copy of the public site to GitHub Pages
+(`.github/workflows/pages.yml` → `scripts/build-static.mjs`). GitHub Pages can't run a server, so that copy:
+
+- has **no admin panel** — content comes from the starting content in `npm run seed`, not from your local database;
+- sends the **contact form, assessment and newsletter** to the visitor's email app, addressed to `abdullaah4229@gmail.com`
+  (change it with a repository variable named `CONTACT_EMAIL`).
+
+For the full site with admin and lead capture, deploy to a server as described in `DEPLOY.md`.
+One-time setup: GitHub repo → Settings → Pages → Source: **GitHub Actions**.

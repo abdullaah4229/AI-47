@@ -1,0 +1,61 @@
+# Publishes a static copy of the public website to GitHub Pages on every push to main.
+# The admin panel and form handling need a server, so they are not included (see README → GitHub Pages).
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - run: npm ci
+
+      - name: Build static site
+        env:
+          # Throwaway values: the database only exists during this build
+          PAYLOAD_SECRET: ${{ github.run_id }}-${{ github.sha }}
+          DATABASE_URI: file:./data/ai742.db
+          NEXT_PUBLIC_SERVER_URL: ${{ steps.pages.outputs.base_url }}
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          # Where the contact, assessment and newsletter forms send visitors' emails
+          NEXT_PUBLIC_CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL || 'abdullaah4229@gmail.com' }}
+        run: |
+          npm run migrate
+          npm run seed
+          node scripts/build-static.mjs
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -9,6 +9,10 @@ import { BlogIndex } from '../../BlogIndex'
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ page?: string }> }
 
+export async function generateStaticParams() {
+  return (await getCategories()).map((c) => ({ slug: c.slug }))
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const cat = (await getCategories()).find((c) => c.slug === slug)
@@ -20,7 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params
-  const page = Math.max(1, Number((await searchParams).page) || 1)
+  // A static export (GitHub Pages) has no query string at build time, so it always renders page 1
+  const page = process.env.STATIC_EXPORT === '1' ? 1 : Math.max(1, Number((await searchParams).page) || 1)
   const categories = await getCategories()
   const cat = categories.find((c) => c.slug === slug)
   if (!cat) notFound()
